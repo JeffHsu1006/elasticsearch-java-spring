@@ -5,11 +5,11 @@ import java.util.List;
 import com.course.elasticsearchjavaspring.entity.Bag;
 
 public interface BagService {
-	List<String> BRANDS = List.of("PLAYBOY", "FOSSIL", "ALPAKA");
+	List<String> BRANDS = List.of("PLAYBOY", "FOSSIL", "ALPAKA", "CALVIN kLEIN", "CHANEL");
 
-	List<String> COLORS = List.of("Gray", "Black", "Red");
+	List<String> COLORS = List.of("Gray", "Black", "Red", "Green", "Yellow");
 
-	List<String> TYPES = List.of("Wallet", "Pouch", "Backpack");
+	List<String> TYPES = List.of("Wallet", "Pouch", "Backpack", "HangBags", "Knapsack");
 
 	List<String> ADDITIONAL_FEATURES = List.of("Zipper", "Pocket", "Buckle", "GPS", "Audio");
 

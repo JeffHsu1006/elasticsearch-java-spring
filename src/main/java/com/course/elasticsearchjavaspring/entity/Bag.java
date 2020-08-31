@@ -3,6 +3,18 @@ package com.course.elasticsearchjavaspring.entity;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+@Document(indexName = "elasticsearch-java-spring")
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Bag {
 
 	private List<String> additionFeatures;
@@ -13,7 +25,12 @@ public class Bag {
 
 	private String color;
 
+	@Field(type = FieldType.Date, format = DateFormat.date)
+	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Taipei")
 	private LocalDate firstReleaseDate;
+
+	@Id
+	private String id;
 
 	private Material material;
 
@@ -51,6 +68,10 @@ public class Bag {
 
 	public LocalDate getFirstReleaseDate() {
 		return firstReleaseDate;
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	public Material getMaterial() {
@@ -91,6 +112,10 @@ public class Bag {
 
 	public void setFirstReleaseDate(LocalDate firstReleaseDate) {
 		this.firstReleaseDate = firstReleaseDate;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public void setMaterial(Material material) {
