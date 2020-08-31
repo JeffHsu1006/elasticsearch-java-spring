@@ -15,9 +15,13 @@ public class Bag {
 
 	private LocalDate firstReleaseDate;
 
+	private Material material;
+
 	private int price;
 
 	private String type;
+
+	private List<Zipper> zippers;
 
 	public Bag() {
 
@@ -49,12 +53,20 @@ public class Bag {
 		return firstReleaseDate;
 	}
 
+	public Material getMaterial() {
+		return material;
+	}
+
 	public int getPrice() {
 		return price;
 	}
 
 	public String getType() {
 		return type;
+	}
+
+	public List<Zipper> getZippers() {
+		return zippers;
 	}
 
 	public boolean isAvailable() {
@@ -81,12 +93,20 @@ public class Bag {
 		this.firstReleaseDate = firstReleaseDate;
 	}
 
+	public void setMaterial(Material material) {
+		this.material = material;
+	}
+
 	public void setPrice(int price) {
 		this.price = price;
 	}
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public void setZippers(List<Zipper> zippers) {
+		this.zippers = zippers;
 	}
 
 	@Override

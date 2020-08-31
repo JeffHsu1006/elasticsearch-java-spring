@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import org.springframework.stereotype.Service;
 
 import com.course.elasticsearchjavaspring.entity.Bag;
+import com.course.elasticsearchjavaspring.entity.Material;
+import com.course.elasticsearchjavaspring.entity.Zipper;
 import com.course.elasticsearchjavaspring.util.RandomDateUtil;
 
 import io.netty.util.internal.ThreadLocalRandom;
@@ -29,8 +31,31 @@ public class RandomBagService implements BagService {
 			i += randomCount;
 		}
 
+		var material_type = MATERIAL_TYPES.get(ThreadLocalRandom.current().nextInt(MATERIAL_TYPES.size()));
+		var thickness = ThreadLocalRandom.current().nextInt(1, 10);
+
+		var material = new Material();
+		material.setType(material_type);
+		material.setThickness(thickness);
+
+		var zippers = new ArrayList<Zipper>();
+		for (int i = 0; i < 3; i++) {
+			var zipper = new Zipper();
+			var manufacturer = ZIPPER_MANUFACTURES.get(ThreadLocalRandom.current().nextInt(ZIPPER_MANUFACTURES.size()));
+			var size = ThreadLocalRandom.current().nextInt(1, 5);
+			var zipperPrice = ThreadLocalRandom.current().nextInt(10, 60);
+
+			zipper.setManufacturer(manufacturer);
+			zipper.setSize(size);
+			zipper.setPrice(zipperPrice);
+
+			zippers.add(zipper);
+		}
+
 		var result = new Bag(brand, color, type, price, available, firstReleaseDate);
 		result.setAdditionFeatures(additionalFeatures);
+		result.setMaterial(material);
+		result.setZippers(zippers);
 
 		return result;
 	}
