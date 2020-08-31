@@ -11,5 +11,7 @@ public interface BagService {
 
 	List<String> TYPES = List.of("Wallet", "Pouch", "Backpack");
 
+	List<String> ADDITIONAL_FEATURES = List.of("Zipper", "Pocket", "Buckle", "GPS", "Audio");
+
 	Bag generateBag();
 }
