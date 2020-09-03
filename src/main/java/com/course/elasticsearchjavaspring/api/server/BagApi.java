@@ -1,12 +1,23 @@
 package com.course.elasticsearchjavaspring.api.server;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +27,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.course.elasticsearchjavaspring.api.response.ErrorResponse;
 import com.course.elasticsearchjavaspring.entity.Bag;
+import com.course.elasticsearchjavaspring.exception.IllegalApiParamException;
 import com.course.elasticsearchjavaspring.repository.BagElasticRepository;
 import com.course.elasticsearchjavaspring.service.BagService;
 
@@ -82,17 +95,61 @@ public class BagApi {
 	}
 
 	@GetMapping(value = "/find-json", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<Bag> findBagsByBrandAndColor(@RequestBody Bag bag) {
-		return bagRepository.findByBrandAndColor(bag.getBrand(), bag.getColor());
+	public List<Bag> findBagsByBrandAndColor(@RequestBody Bag bag, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+		var pageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "price"));
+		return bagRepository.findByBrandAndColor(bag.getBrand(), bag.getColor(), pageable).getContent();
 	}
 
 	@GetMapping(value = "/bags/{brand}/{color}")
-	public List<Bag> findBagsByPath(@PathVariable String brand, @PathVariable String color) {
-		return bagRepository.findByBrandAndColor(brand, color);
+	public ResponseEntity<Object> findBagsByPath(@PathVariable String brand, @PathVariable String color,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+		var headers = new HttpHeaders();
+		headers.add(HttpHeaders.SERVER, "Spring");
+		headers.add("Custom-Header", "Custom Response Header");
+
+		// check whether parameter "color" is numeric
+		if (StringUtils.isNumeric(color)) {
+			var errorResponse = new ErrorResponse("Invalid color : " + color, LocalDateTime.now());
+			// var successResponse = new SuccessResponse("SUCCESS!");
+
+			return new ResponseEntity<Object>(errorResponse, headers, HttpStatus.BAD_REQUEST);
+		}
+
+		var pageable = PageRequest.of(page, size);
+		var bags = bagRepository.findByBrandAndColor(brand, color, pageable).getContent();
+
+		return ResponseEntity.ok().headers(headers).body(bags);
 	}
 
 	@GetMapping(value = "/bags")
-	public List<Bag> findBagsByParam(@RequestParam String brand, @RequestParam String color) {
-		return bagRepository.findByBrandAndColor(brand, color);
+	public List<Bag> findBagsByParam(@RequestParam String brand, @RequestParam String color,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+		if (StringUtils.isNumeric(color)) {
+			throw new IllegalArgumentException("Invalid color : " + color);
+		}
+
+		if (StringUtils.isNumeric(brand)) {
+			throw new IllegalApiParamException("Invalid brand : " + brand);
+		}
+
+		var pageable = PageRequest.of(page, size);
+		return bagRepository.findByBrandAndColor(brand, color, pageable).getContent();
+	}
+
+	@GetMapping(value = "/bags/date")
+	public List<Bag> findBagsReleasedAfter(
+			@RequestParam(name = "first_release_date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate firstReleaseDate) {
+		return bagRepository.findByFirstReleaseDateAfter(firstReleaseDate);
+	}
+
+	@ExceptionHandler(value = IllegalArgumentException.class)
+	public ResponseEntity<ErrorResponse> handleInvalidColorException(IllegalArgumentException e) {
+		var message = "Exception, " + e.getMessage();
+		LOG.warn(message);
+
+		var errorResponse = new ErrorResponse(message, LocalDateTime.now());
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
 	}
 }
