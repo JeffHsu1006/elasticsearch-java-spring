@@ -34,9 +34,15 @@ import com.course.elasticsearchjavaspring.repository.BagElasticRepository;
 import com.course.elasticsearchjavaspring.service.BagService;
 
 import io.netty.util.internal.ThreadLocalRandom;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RequestMapping(value = "/api/bag/v1")
 @RestController
+@Tag(name = "Bag API", description = "Document for Bag API")
 public class BagApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BagApi.class);
@@ -52,8 +58,10 @@ public class BagApi {
 		return bagService.generateBag();
 	}
 
+	@Operation(summary = "Echo car", description = "Echo given bag input")
 	@PostMapping(value = "/echo", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public String echo(@RequestBody Bag bag) {
+	public String echo(
+			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Bag to be echoed") @RequestBody Bag bag) {
 		LOG.info("Bag is {}", bag);
 		return bag.toString();
 	}
@@ -102,8 +110,14 @@ public class BagApi {
 	}
 
 	@GetMapping(value = "/bags/{brand}/{color}")
-	public ResponseEntity<Object> findBagsByPath(@PathVariable String brand, @PathVariable String color,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+	@Operation(summary = "Find bags by path", description = "Find bags by path variable")
+	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Everything is OK"),
+			@ApiResponse(responseCode = "400", description = "Bad input parameter"), })
+	public ResponseEntity<Object> findBagsByPath(
+			@Parameter(description = "Brand to be found") @PathVariable String brand,
+			@Parameter(description = "Color to be found", example = "Red") @PathVariable String color,
+			@Parameter(description = "Page number (for pagination)") @RequestParam(defaultValue = "0") int page,
+			@Parameter(description = "Number of items per page (for pagination)") @RequestParam(defaultValue = "10") int size) {
 		var headers = new HttpHeaders();
 		headers.add(HttpHeaders.SERVER, "Spring");
 		headers.add("Custom-Header", "Custom Response Header");
